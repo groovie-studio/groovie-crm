@@ -3,7 +3,14 @@
 **Groovie CRM** is a lightweight customer analytics and segmentation engine built in R.
 It focuses on turning raw customer data into actionable audiences and simple decision signals.
 
----
+This project uses `renv` for package dependency management.
+
+## Restore environment
+
+Run:
+
+```r
+renv::restore()
 
 ## 🎯 Purpose
 
