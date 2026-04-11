@@ -6,8 +6,9 @@ packages <- c(
   "ggplot2",
   "cluster",
   "factoextra",
-  "renv"
-  "writexl"
+  "renv",
+  "writexl",
+  "BTYD"
 )
 
 installed <- packages %in% rownames(installed.packages())
