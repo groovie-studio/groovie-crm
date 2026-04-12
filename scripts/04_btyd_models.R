@@ -61,6 +61,7 @@ write.csv(
 # Higher values indicate stronger short-term purchase intent.
 
 summary(bgnbd_cal$p_alive)
+
 # Note: Customers with high past frequency can still have low p_alive,
 # indicating that they were active in the past but may have churned recently.
 # Combining pred_30d and p_alive allows segmentation of customers into:
@@ -74,3 +75,59 @@ bgnbd_cal %>%
     avg_pred = mean(pred_30d),
     avg_alive = mean(p_alive)
   )
+
+
+# Prepare Gamma-Gamma / spend-model inputs:
+# x = repeat purchases
+# m.x = average monetary value per transaction
+
+gg_data <- lrfmp_base %>%
+  mutate(
+    x = F - 1,
+    m.x = M / F
+  ) %>%
+  filter(x > 0) %>%
+  select(customer_id, x, m.x)
+
+# Fit spend model (Gamma-Gamma equivalent)
+gg_model <- spend.EstimateParameters(
+  gg_data$x,
+  gg_data$m.x
+)
+
+# Estimate expected average transaction value per customer
+gg_data$exp_avg_value <- spend.expected.value(
+  gg_model,
+  gg_data$x,
+  gg_data$m.x
+)
+
+# Combine BG/NBD and spend-model outputs to estimate 30-day customer value
+
+clv_data <- bgnbd_cal %>%
+  select(customer_id, pred_30d, p_alive) %>%
+  left_join(
+    gg_data %>% select(customer_id, exp_avg_value),
+    by = "customer_id"
+  )
+
+
+# CLV = expected future transactions × expected average transaction value
+
+clv_data <- clv_data %>%
+  mutate(
+    clv_30d = pred_30d * exp_avg_value
+  )
+
+# Combining CLV with p_alive enables identification of:
+# - high-value active customers
+# - high-value customers at risk of churn
+# - low-value but active customers
+# - churned low-value customers
+
+
+# Top 10 customers by predicted 30-day CLV
+
+clv_data %>%
+  arrange(desc(clv_30d)) %>%
+  head(10)
