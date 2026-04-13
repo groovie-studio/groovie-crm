@@ -13,7 +13,7 @@ source("./scripts/02_lrfmvp_base.R")
 
 bgnbd_cal <- lrfmp_base %>%
   mutate(
-    x = F - 1,
+     x = F - 1,
     `t.x` = L,
     `T.cal` = as.numeric(analysis_date - first_order)
   ) %>%
@@ -78,7 +78,7 @@ bgnbd_cal %>%
 
 
 # Prepare Gamma-Gamma / spend-model inputs:
-# x = repeat purchases
+# x = repeat purchases # nolint
 # m.x = average monetary value per transaction
 
 gg_data <- lrfmp_base %>%
@@ -102,15 +102,22 @@ gg_data$exp_avg_value <- spend.expected.value(
   gg_data$m.x
 )
 
-# Combine BG/NBD and spend-model outputs to estimate 30-day customer value
+# Combine multiple data sources into a single customer-level dataset:
+# - BG/NBD outputs: future transaction behavior (pred_30d, p_alive)
+# - Gamma-Gamma outputs: expected monetary value per transaction (exp_avg_value)
+# - LRFM base: historical behavior (F = frequency, M = total spend)
+# This unified structure enables CLV calculation and downstream targeting decisions # nolint
 
 clv_data <- bgnbd_cal %>%
-  select(customer_id, pred_30d, p_alive) %>%
+  select(customer_id, pred_30d, p_alive, `T.cal`, `t.x`) %>%
   left_join(
     gg_data %>% select(customer_id, exp_avg_value),
     by = "customer_id"
+  ) %>%
+  left_join(
+    lrfmp_base %>% select(customer_id, F, M),
+    by = "customer_id"
   )
-
 
 # CLV = expected future transactions × expected average transaction value
 
@@ -128,6 +135,19 @@ clv_data <- clv_data %>%
 
 # Top 10 customers by predicted 30-day CLV
 
-clv_data %>%
-  arrange(desc(clv_30d)) %>%
-  head(10)
+
+
+clv_data <- clv_data %>%
+  mutate(
+    recency_days = `T.cal` - `t.x`
+  )
+
+# Adjust p_alive and recency_days thresholds to ensure the target segment is not overly restrictive and returns meaningful results.
+target_customers <- clv_data %>%
+  filter(
+    clv_30d > quantile(clv_30d, 0.75, na.rm = TRUE),
+    p_alive < 0.6,
+    recency_days < 180,
+    F >= 2,
+    M > median(M, na.rm = TRUE)
+  )

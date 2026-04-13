@@ -8,7 +8,8 @@ packages <- c(
   "factoextra",
   "renv",
   "writexl",
-  "BTYD"
+  "BTYD",
+  "arules"
 )
 
 installed <- packages %in% rownames(installed.packages())
