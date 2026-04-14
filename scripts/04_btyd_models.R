@@ -4,7 +4,7 @@ library(BTYD)
 # BG/NBD model translates past purchase behavior into
 # expected future transactions and customer survival probability.
 
-source("./scripts/02_lrfmvp_base.R")
+source("scripts/02_lrfmvp_base.R")
 
 # Map LRFM features to BG/NBD model inputs:
 # x = number of repeat purchases (F - 1)
@@ -48,11 +48,11 @@ summary(bgnbd_cal$p_alive)
 bgnbd_output <- bgnbd_cal %>%
   select(customer_id, x, `t.x`, `T.cal`, pred_30d, p_alive)
 
-dir.create("./reports", showWarnings = FALSE)
+dir.create("reports", showWarnings = FALSE)
 
 write.csv(
   bgnbd_output,
-  "./reports/bgnbd_output.csv",
+  "reports/bgnbd_output.csv",
   row.names = FALSE
 )
 

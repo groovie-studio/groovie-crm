@@ -9,7 +9,8 @@ packages <- c(
   "renv",
   "writexl",
   "BTYD",
-  "arules"
+  "arules",
+  "openxlsx"
 )
 
 installed <- packages %in% rownames(installed.packages())

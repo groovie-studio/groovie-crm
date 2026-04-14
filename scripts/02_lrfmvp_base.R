@@ -35,5 +35,5 @@ glimpse(lrfmp_base)
 head(lrfmp_features)
 
 # 6) Export the LRFMPV base table to an Excel file for further analysis..
-dir.create("./reports", showWarnings = FALSE)
-write_xlsx(lrfmp_base, "./reports/lrfmp_base.xlsx")
+dir.create("reports", showWarnings = FALSE)
+write_xlsx(lrfmp_base, "reports/lrfmp_base.xlsx")

@@ -4,7 +4,7 @@ library(lubridate)
 library(stringr)
 library(writexl)
 
-df <- read_csv("./data/hybrid_fashion_data_w_profit.csv")
+df <- read_csv("data/hybrid_fashion_data_w_profit.csv")
 
 df <- df %>%
   mutate(
