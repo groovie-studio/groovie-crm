@@ -45,8 +45,8 @@ library(writexl)
 # - exp_avg_value
 # - clv_30d
 
-source("scripts/02_lrfmp_base.R")
-source("scripts/03_bgnbd_gamma_gamma_clv.R")
+source("scripts/02_lrfmvp_base.R")
+source("scripts/03_cohort_analysis.R")
 
 
 # ------------------------------------------------------------
@@ -83,18 +83,18 @@ churn_input <- clv_data %>%
 #   lower frequency customers receive higher risk contribution
 #
 # Default weights:
-# - 50% p_alive risk
-# - 30% recency rhythm risk
-# - 20% frequency risk
+# - 60% p_alive risk
+# - 25% recency rhythm risk
+# - 15% frequency risk
 #
 # These are expert heuristic default weights.
 # They can later be calibrated using backtesting or logistic regression.
 
 calculate_churn_risk <- function(
   df,
-  w_p_alive = 0.50,
-  w_recency = 0.30,
-  w_frequency = 0.20
+  w_p_alive = 0.60,
+  w_recency = 0.25,
+  w_frequency = 0.15
 ) {
   df %>%
     mutate(
